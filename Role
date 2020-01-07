@@ -27,6 +27,8 @@ PLAY RECAP *********************************************************************
 192.168.56.102             : ok=6    changed=2    unreachable=0    failed=0
 192.168.56.103             : ok=6    changed=2    unreachable=0    failed=0
 
+
+트리구조
 [root@master roles]# tree
 .
 ├── meta
