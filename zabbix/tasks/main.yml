@@ -1,0 +1,5 @@
+---
+- name: nginx for Any Linux
+  import_tasks: /etc/ansible/roles/zabbix/tasks/install_zabbix.yml
+
+

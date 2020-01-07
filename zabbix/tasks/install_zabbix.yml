@@ -1,0 +1,16 @@
+   - name: Copy Zabbix Agent
+     copy:
+      src: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+      dest: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+
+   - name: install zabbix-agent
+     yum: name=/tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm state=installed
+
+   - name: copy agentd.conf
+     copy:
+       src: zabbix_agentd.conf
+       dest: /etc/zabbix
+
+   - name: Start Zabbix Agent
+     action: service name=zabbix-agent state=started enabled=yes
+      
