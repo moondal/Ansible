@@ -1,0 +1,31 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+   - name: Check zabbix agent
+     script: /tmp/test.sh
+     register: result
+   - debug: var=result.stdout_lines
+
+   - name: Copy Zabbix Agent
+     copy:
+      src: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+      dest: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+     when: result.rc == 0
+
+   - name: install zabbix-agent
+     yum: name=/tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm state=installed
+     when: result.rc == 0
+
+   - name: Copy Zabbix Agent File
+     copy:
+      src: /tmp/zabbix_agentd7.conf
+      dest: /etc/zabbix/zabbix_agentd.conf
+     when: result.rc == 0
+
+#Start Zabbix
+   - name: Start Zabbix Agent
+     action: service name=zabbix-agent state=started enabled=yes
+     when: result.rc == 0
+
