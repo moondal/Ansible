@@ -1,0 +1,13 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+#프로세스 확인
+    - name: Get running processes list from remote host
+      ignore_errors: yes
+      shell: "ps -ef | grep -v grep | grep '/usr/sbin/zabbix_agentd -c /etc/zabbix/zabbix_agentd.conf' | wc -l"
+      register: running_processes
+#프로세스 확인하여 0인것들에 대해서 install.yml 시작
+    - name: Include task list in play
+      import_tasks: install.yml
+      when: running_processes.stdout == "0"

@@ -1,0 +1,16 @@
+    - name: install Zabbix Agent 7
+      copy:
+       src: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+       dest: /tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm
+
+    - name: install nginx web server
+      yum: name=/tmp/zabbix-agent-4.0.7-1.el7.x86_64.rpm state=installed
+
+    - name: Copy Zabbix Agent File
+      copy:
+       src: /tmp/zabbix_agentd7.conf
+       dest: /etc/zabbix/zabbix_agentd.conf
+
+    - name: Start Zabbix Agent
+      action: service name=zabbix-agent state=started enabled=yes
+
