@@ -1,0 +1,10 @@
+---
+- hosts: all
+  gather_facts: no
+  become: yes
+  tasks:
+   - name: chage
+     shell: chage -l test | grep -i "^Password expires"
+     register: result
+
+   - debug: var=result.stdout_lines
