@@ -1,0 +1,120 @@
+apache : 2.4
+
+./configure --prefix=/app/web/apache24 --with-mpm=worker --with-apr=/usr/local/apr/bin/apr-1-config --with-apr-util=/usr/local/apr-util/bin/apu-1-config --with-ssl=/usr/lib64/openssl --enable-so --enable-ssl --enable-mods-shared=all
+
+make && make install
+
+
+
+apr : 
+
+./configure --prefix=/usr/local/apr
+
+make && make install
+
+
+./configure --prefix=/usr/local/apr-util --with-apr=/usr/local/apr
+
+make && make install
+
+
+
+
+alternatives --install /usr/bin/java java /app/prod/jdk1.8.0_162/bin/java 100 
+alternatives --config java
+
+httpd.conf
+
+Include conf/mod-jk.conf
+
+./configure --with-apxs=/app/web/apache24/bin/apxs
+
+make && make install
+
+
+mod-jk.conf
+
+# Load mod_jk module
+LoadModule jk_module modules/mod_jk.so
+
+# Where to find workers.properties
+JkWorkersFile conf/workers.properties
+
+# Where to put jk shared memory
+JkShmFile logs/jk.shm
+
+# Where to put jk logs
+JkLogFile "|/app/web/apache24/bin/rotatelogs /app/web/apache24/logs/mod_jk_%Y%m%d%H.log 86400"
+
+# Set the jk log level [debug/error/info]
+JkLogLevel debug
+
+# Select the timestamp log format
+JkLogStampFormat "[%a %b %d %H:%M:%S %Y] "
+
+# Send servlet for context /examples to worker named worker
+JkMount /* router
+#JkMountFile conf.d/uriworkermap.properties
+
+<Location /jkstatus>
+    JkMount status
+    Order deny,allow
+    Allow from 192.168.56.101
+</Location>
+
+
+/var/lib/httpd/conf/workers.properties
+# workers.properties
+
+# -------------------
+worker.list=router,status
+# -------------------
+worker.template.type=ajp13
+worker.template.ping_mode=A
+#worker.template.ping_timeout=10000
+#worker.template.connect_timeout=300000
+#worker.template.connection_pool_timeout=20
+#worker.template.lbfactor=1
+worker.template.socket_connect_timeout=10000
+worker.template.connection_pool_size=15
+
+# -------------------
+# Node1 WAS Server
+# -------------------
+worker.node1.host=192.168.56.101
+worker.node1.port=8009
+worker.node1.reference=worker.template
+
+# -------------------
+# Node2 WAS Server
+# -------------------
+#worker.node2.host=192.168.56.101
+#worker.node2.port=8109
+#worker.node2.reference=worker.template
+
+# Define the LB worker
+worker.router.type=lb
+worker.router.balance_workers=node1,node2
+worker.router.sticky_session=True
+worker.status.type=status
+#worker.router.sticky_session_force=False
+#worker.router.method=Request
+#worker.router.lock=Optimistic
+#worker.router.retries=2
+
+SERVER_NAME=test
+JAVA_HOME=/app/prod/jdk1.7.0_10
+JAVA_OPTS="-D$SERVER_NAME"
+JAVA_OPTS="$JAVA_OPTS -Xms1024m -Xmx1024m -XX:MaxPermSize=256m"
+
+
+# mkdir /cdrom
+# mount /dev/cdrom /cdrom
+# vi /etc/yum.repos.d/local.repo
+
+
+[LocalRepo]
+name=Local Repository
+baseurl=file:///cdrom
+enabled=1
+gpgcheck=0
